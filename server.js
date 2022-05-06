@@ -1,4 +1,6 @@
 const net = require("net")
+const fs = require("fs")
+const basePath ="/Users/amoyr/projects/"
 
 const server = net.createServer(socket => {
   socket.setEncoding('utf8')
@@ -14,7 +16,6 @@ const server = net.createServer(socket => {
     if (method === "READ") {
       const responseFile = readMethod(path)
       socket.write(responseFile)
-      //console.log(responseFile)
     }
 
 
@@ -26,16 +27,13 @@ const server = net.createServer(socket => {
 }).listen(3333)
 
 function readMethod(requestedPath) {
-  const fs = require("fs")
-  const basePath ="/Users/amoyr/projects/"
   const responseFile = fs.readFileSync(basePath + requestedPath, "utf-8") 
   return responseFile
 }
 
-function writeMethod(dstPath, body) {
-  const fs = require("fs")
-  const basePath ="/Users/amoyr/projects/"
-  fs.writeFile(basePath + dstPath, body, function (err) {
+
+function writeMethod(requestedPath, body) {
+  fs.writeFile(basePath + requestedPath, body, function (err) {
     if (err) { throw err }
     console.log("completed uproad")
   })
