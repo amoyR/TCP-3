@@ -1,5 +1,5 @@
 const net = require("net")
-const fs = require("fs")
+const fs  = require("fs")
 
 const basePath ="/Users/amoyr/projects"
 
@@ -8,6 +8,7 @@ const server = net.createServer(socket => {
   socket.on("data", data => {
     console.log(data)
     console.log("data comes from " + socket.remoteAddress + socket.remotePort )
+
     const separationInx = data.indexOf("\n\n")
     let reqLine
     if (separationInx === -1) {
@@ -23,108 +24,152 @@ const server = net.createServer(socket => {
 
 
     if (method === "READ") {
-      try {
-        const rspBody    = readMethod(path)
-        const statusCode ="SUCCEEDED"
-        const response   = `${statusCode}\n\n${rspBody}`
-        socket.write(response)
-
-      } catch (e) {
-        const statusCode = "FAILED"
-        const rspBody    = "Not Found"
-        const response   = `${statusCode}\n\n${rspBody}`
-        socket.write(response)
-      }
+      const Read     = new READ(basePath, path) 
+      const response = Read.createRes()
+      socket.write(response)
     }
 
     if (method === "WRITE") {
-      try {
-        writeMethod(path, body)
-        const statusCode ="SUCCEEDED"
-        const response   = `${statusCode}`
-        socket.write(response)
-
-      } catch (e) {
-        const statusCode = "FAILED"
-        const response   = `${statusCode}`
-        socket.write(response)
-      }
+      const Write    = new WRITE(basePath, path, body) 
+      const response = Write.createRes()
+      socket.write(response)
     }
 
     if (method === "DELETE") {
-      try {
-        deleteMethod(path)
-        const statusCode ="SUCCEEDED"
-        const response   = `${statusCode}`
-        socket.write(response)
-
-      } catch (e) {
-        const statusCode = "FAILED"
-        const rspBody    = "Not Found"
-        const response   = `${statusCode}\n\n${rspBody}`
-        socket.write(response)
-      }
+      const Delete   = new DELETE(basePath, path) 
+      const response = Delete.createRes()
+      socket.write(response)
     }
 
     if (method === "LIST") {
-      try {
-        const rspBody = listMethod(path)
-        const statusCode ="SUCCEEDED"
-        const response   = `${statusCode}\n\n${rspBody}`
-        socket.write(response)
-
-      } catch (e) {
-        const statusCode = "FAILED"
-        const rspBody    = "Not Found"
-        const response   = `${statusCode}\n\n${rspBody}`
-        socket.write(response)
-      }
+      const List     = new LIST(basePath, path) 
+      const response = List.createRes()
+      socket.write(response)
     }
+
   })
 
 }).listen(3333)
 
-function readMethod(requestedPath) {
-  const responseFile = fs.readFileSync(basePath + requestedPath, "utf-8") 
-  return responseFile
+
+class READ {
+  constructor(basePath, requestedPath) {
+    this.basePath      = basePath
+    this.requestedPath = requestedPath
+  }
+
+  readMethod (){
+    this.responseFile = fs.readFileSync(this.basePath + this.requestedPath, "utf-8") 
+  }
+
+  createRes() {
+    try {
+      this.readMethod()
+      const resBody    = this.responseFile
+      const statusCode = "SUCCEEDED"
+      const response   = `${statusCode}\n\n${resBody}`
+      return response
+    } catch (e) {
+      const statusCode = "FAILED"
+      const resBody    = "Not Found"
+      const response   = `${statusCode}\n\n${resBody}`
+      return response
+    }
+  }
 }
 
 
-function writeMethod(requestedPath, body) {
-  const separationIndex = requestedPath.lastIndexOf("/")
-  const file = requestedPath.substring(separationIndex + 1)
-  const dir  = requestedPath.substring(0, separationIndex + 1)
+class WRITE {
+  constructor(basePath, requestedPath, body) {
+    this.basePath      = basePath
+    this.requestedPath = requestedPath
+    this.body          = body
+  }
 
-  fs.mkdir(basePath + dir, { recursive: true }, (err) => {
-    if (err) { throw err }
+  writeMethod (){
+    const separationIndex = this.requestedPath.lastIndexOf("/")
 
-    fs.writeFile(basePath + dir + file, body, (err) => {
+    const file = this.requestedPath.substring(separationIndex + 1)
+    const dir  = this.requestedPath.substring(0, separationIndex + 1)
+
+    fs.mkdir(basePath + dir, { recursive: true }, (err) => {
       if (err) { throw err }
 
+      fs.writeFile(this.basePath + dir + file, this.body, (err) => {
+        if (err) { throw err }
+
+      })
     })
-  })
+  }
+
+  createRes() {
+    try {
+      this.writeMethod()
+      const statusCode = "SUCCEEDED"
+      const response   = `${statusCode}`
+      return response
+    } catch (e) {
+      const statusCode = "FAILED"
+      const response   = `${statusCode}`
+      return response
+    }
+  }
 }
 
-function deleteMethod(requestedPath) {
-  const deletefile = fs.unlinkSync(basePath + requestedPath)
-  return deletefile
+class DELETE {
+  constructor(basePath, requestedPath){
+    this.basePath      = basePath
+    this.requestedPath = requestedPath
+  }
+
+  deleteMethod () {
+    const deletePath = this.basePath + this.requestedPath
+    if (fs.statSync(deletePath).isDirectory()){
+      fs.rmdirSync(deletePath)
+    } else {
+      fs.unlinkSync(deletePath)
+    }
+
+  }
+
+  createRes() {
+    try {
+      this.deleteMethod()
+      const statusCode = "SUCCEEDED"
+      const response   = `${statusCode}`
+      return response
+    } catch (e) {
+      const statusCode = "FAILED"
+      const resBody    = "Not Found"
+      const response   = `${statusCode}\n\n${resBody}`
+      return response
+    }
+  }
 }
 
-function listMethod (requestedPath) {
-  const list = fs.readdirSync(basePath + requestedPath)
-  return list
-}
-function creatRspMsg (methodFunc){
-  try {
-    methodFunc
-    const statusCode ="SUCCEEDED"
-    const response   = `${statusCode}`
-    socket.write(response)
+class LIST {
+  constructor(basePath, requestedPath){
+    this.basePath      = basePath
+    this.requestedPath = requestedPath
+  }
+  
+  listMethod () {
+    this.list = fs.readdirSync(this.basePath + this.requestedPath)
+  }
 
-  } catch (e) {
-    const statusCode = "FAILED"
-    const response   = `${statusCode}`
-    socket.write(response)
+  createRes() {
+    try {
+      this.listMethod()
+      const resBody    = this.list.join("\n")
+      const statusCode ="SUCCEEDED"
+      const response   = `${statusCode}\n\n${resBody}`
+      return response
+    } catch (e) {
+      const statusCode = "FAILED"
+      const resBody    = "Not Found"
+      const response   = `${statusCode}\n\n${resBody}`
+      return response
+    }
   }
 }
 

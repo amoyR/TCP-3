@@ -1,17 +1,19 @@
 const net = require("net")
-const fs = require("fs")
-const basePath ="/Users/amoyr/projects"
-
+const fs  = require("fs")
 const rl = require('readline').createInterface({
   input: process.stdin,
   output: process.stdout
 })
+
+const basePath ="/Users/amoyr/projects"
+
 
 const client = net.connect("3333", "localhost", () => {
   console.log("connected to server")
   client.setEncoding('utf8')
 
   rl.question("READ or WRITE or DELETE or LIST => ", method => {
+
     if (method === "READ") {
       rl.question("Input resrcPath => ", resrcPath => {
         rl.question("Input savePath => ", savePath => {
@@ -21,6 +23,7 @@ const client = net.connect("3333", "localhost", () => {
 
           client.on("data", data => {
             const separationInx = data.indexOf("\n\n") 
+
             const resLine = data.substring(0, separationInx)
             const body    = data.substring(separationInx)
 
@@ -34,13 +37,16 @@ const client = net.connect("3333", "localhost", () => {
       })
     }
 
-
     if ( method === "WRITE") {
       rl.question("Input resrcPath => ", resrcPath => {
         rl.question("Input fetchFilePath => ", fetchFilePath => {
-          const body = fs.readFileSync(fetchFilePath, "utf-8") 
+          try {
+          const body        = fs.readFileSync(fetchFilePath, "utf-8") 
           const writeReqMsg = `${method} ${resrcPath}\n\n${body}`
           client.write(writeReqMsg)
+          } catch (e) {
+            console.log("no such file or directory")
+          }
         })
       })
     }
