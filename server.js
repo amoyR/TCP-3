@@ -1,7 +1,7 @@
 const net = require("net")
 const fs  = require("fs")
 
-const basePath ="/Users/amoyr/projects"
+const basePath ="/Users/amoyr/projects/TCP-3/dataBase"
 
 const server = net.createServer(socket => {
   socket.setEncoding('utf8')
@@ -9,19 +9,10 @@ const server = net.createServer(socket => {
     console.log(data)
     console.log("data comes from " + socket.remoteAddress + socket.remotePort )
 
-    const separationInx = data.indexOf("\n\n")
-    let reqLine
-    if (separationInx === -1) {
-      reqLine = data
-    } else {
-      reqLine = data.substring(0, separationInx)
-    }
-    const body = data.substring(separationInx)
-
-    const reqLineAry = reqLine.split(" ")
-    const method     = reqLineAry[0]
-    const path       = reqLineAry[1]
-
+    const reqMsgAry = parse(data)
+    const method = reqMsgAry[0]
+    const path = reqMsgAry[1]
+    const body = reqMsgAry[2]
 
     if (method === "READ") {
       const Read     = new READ(basePath, path) 
@@ -171,5 +162,23 @@ class LIST {
       return response
     }
   }
+}
+
+function parse (data) {
+  const separationInx = data.indexOf("\n\n")
+  let reqLine
+  if (separationInx === -1) {
+    reqLine = data
+  } else {
+    reqLine = data.substring(0, separationInx)
+  }
+  const body = data.substring(separationInx)
+
+  const reqLineAry = reqLine.split(" ")
+  const method     = reqLineAry[0]
+  const path       = reqLineAry[1]
+  
+  const parsedReqMsg = [method, path, body]
+  return parsedReqMsg
 }
 
