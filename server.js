@@ -6,8 +6,8 @@ const basePath ="/Users/amoyr/projects/TCP-3/dataBase"
 const server = net.createServer(socket => {
   socket.setEncoding('utf8')
   socket.on("data", data => {
-    console.log(data)
     console.log("data comes from " + socket.remoteAddress + socket.remotePort )
+    console.log(data)
 
     const reqMsgAry = parse(data)
     const method = reqMsgAry[0]
@@ -172,7 +172,7 @@ function parse (data) {
   } else {
     reqLine = data.substring(0, separationInx)
   }
-  const body = data.substring(separationInx)
+  const body = data.substring(separationInx + 2)
 
   const reqLineAry = reqLine.split(" ")
   const method     = reqLineAry[0]

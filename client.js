@@ -5,9 +5,6 @@ const rl = require('readline').createInterface({
   output: process.stdout
 })
 
-const basePath ="/Users/amoyr/projects"
-
-
 const client = net.connect("3333", "localhost", () => {
   console.log("connected to server")
   client.setEncoding('utf8')
@@ -18,8 +15,16 @@ const client = net.connect("3333", "localhost", () => {
       rl.question("Input resrcPath => ", resrcPath => {
         rl.question("Input savePath => ", savePath => {
 
-          const readReqMsg = `${method} ${resrcPath}`
-          client.write(readReqMsg)
+          try {
+            const sepInx = savePath.lastIndexOf("/")
+            const dir = savePath.substring(0, sepInx + 1)
+            fs.readdirSync(dir)
+
+            const readReqMsg = `${method} ${resrcPath}`
+            client.write(readReqMsg)
+          } catch (e) {
+            console.log("no such file or directory")
+          }
 
           client.on("data", data => {
             const separationInx = data.indexOf("\n\n") 
@@ -41,9 +46,9 @@ const client = net.connect("3333", "localhost", () => {
       rl.question("Input resrcPath => ", resrcPath => {
         rl.question("Input fetchFilePath => ", fetchFilePath => {
           try {
-          const body        = fs.readFileSync(fetchFilePath, "utf-8") 
-          const writeReqMsg = `${method} ${resrcPath}\n\n${body}`
-          client.write(writeReqMsg)
+            const body        = fs.readFileSync(fetchFilePath, "utf-8") 
+            const writeReqMsg = `${method} ${resrcPath}\n\n${body}`
+            client.write(writeReqMsg)
           } catch (e) {
             console.log("no such file or directory")
           }
@@ -64,10 +69,13 @@ const client = net.connect("3333", "localhost", () => {
         client.write(listReqMsg)
       })
     }
+     
+
     client.on("data", data => {
       console.log(data)
     })
   })
 })
+
 
 
