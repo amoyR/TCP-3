@@ -21,16 +21,16 @@ READ /x/y/z.txt
 Hello World !
 ```
 ### Method
-READ
+- READ
  the READ method requests a representation of the specified resource. And the representation is saved in locally.
 
-WRITE
+- WRITE
 The WRITE method submits a local entity to the specified resource.
 
-DELETE
+- DELETE
 The DELETE method deletes the specified resource.
 
-LIST
+- LIST
 The LIST requests a list under the specified resource.
 
 ## Response Format
@@ -49,10 +49,10 @@ SUCCEEDED
 Hello World !
 ```
 ### Status Line
-SUCCEEDED
+- SUCCEEDED
 The SUCCEEDED indicates that the request has succeeded.
 
-FAILED
+- FAILED
 THe FAILED indicates that the server failed with processing request.
 
 # Screenshots
