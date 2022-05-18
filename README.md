@@ -22,16 +22,16 @@ Hello World !
 ```
 ### Method
 - READ
- - the READ method requests a representation of the specified resource. And the representation is saved in locally.
+  - the READ method requests a representation of the specified resource. And the representation is saved in locally.
 
 - WRITE
- - The WRITE method submits a local entity to the specified resource.
+  - The WRITE method submits a local entity to the specified resource.
 
 - DELETE
- - The DELETE method deletes the specified resource.
+  - The DELETE method deletes the specified resource.
 
 - LIST
- - The LIST requests a list under the specified resource.
+  - The LIST requests a list under the specified resource.
 
 ## Response Format
 A response contains a status line and a body. The body can be empty for some method.
@@ -50,10 +50,10 @@ Hello World !
 ```
 ### Status Line
 - SUCCEEDED
- - The SUCCEEDED indicates that the request has succeeded.
+  - The SUCCEEDED indicates that the request has succeeded.
 
 - FAILED
- - The FAILED indicates that the server failed with processing request.
+  - The FAILED indicates that the server failed with processing request.
 
 # Screenshots
 I made a client and server program to demonstrate a file service using this protocol. Here are its screenshots.
